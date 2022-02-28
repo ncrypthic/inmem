@@ -244,7 +244,7 @@ func parseConnectionURI(uri string) (*connConf, error) {
 // The returned connection is only used by one goroutine at a
 // time.
 func (s *Server) Connect(_ context.Context) (driver.Conn, error) {
-	return newConn(s.conn, s), err
+	return newConn(s.conn, s), nil
 }
 
 // Driver returns the underlying Driver of the Connector,
