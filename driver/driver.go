@@ -28,6 +28,7 @@ type Server struct {
 	engine   *engine.Engine
 	driver   driver.Driver
 	dsn      string
+	conn     *Conn
 
 	// Kill server on last connection closing
 	sync.Mutex
@@ -94,6 +95,7 @@ func (rs *Driver) Open(dsn string) (conn driver.Conn, err error) {
 			engine:   engine,
 			driver:   rs,
 			dsn:      dsn,
+			conn:     driverConn,
 		}
 		rs.servers[dsn] = dsnServer
 
@@ -129,7 +131,7 @@ func (rs *Driver) OpenConnector(dsn string) (driver.Connector, error) {
 			return nil, err
 		}
 
-		_, err = driverEndpoint.New(dsn)
+		driverConn, err = driverEndpoint.New(dsn)
 		if err != nil {
 			return nil, err
 		}
@@ -138,6 +140,7 @@ func (rs *Driver) OpenConnector(dsn string) (driver.Connector, error) {
 			endpoint: driverEndpoint,
 			engine:   engine,
 			driver:   rs,
+			conn:     driverConn,
 		}
 		rs.servers[dsn] = s
 	}
@@ -241,8 +244,7 @@ func parseConnectionURI(uri string) (*connConf, error) {
 // The returned connection is only used by one goroutine at a
 // time.
 func (s *Server) Connect(_ context.Context) (driver.Conn, error) {
-	driverConn, err := s.endpoint.New(s.dsn)
-	return newConn(driverConn, s), err
+	return newConn(s.conn, s), err
 }
 
 // Driver returns the underlying Driver of the Connector,
