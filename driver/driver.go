@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/proullon/ramsql/engine"
-	"github.com/proullon/ramsql/engine/log"
-	"github.com/proullon/ramsql/engine/protocol"
+	"github.com/ncrypthic/inmem/engine"
+	"github.com/ncrypthic/inmem/engine/log"
+	"github.com/ncrypthic/inmem/engine/protocol"
 )
 
 func init() {

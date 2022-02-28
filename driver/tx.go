@@ -9,6 +9,12 @@ type Tx struct {
 	conn *Conn
 }
 
+func NewTransaction(c *Conn) *Tx {
+	return &Tx{
+		conn: c,
+	}
+}
+
 // Commit the transaction on server
 func (t *Tx) Commit() error {
 	// TODO: Not implemented

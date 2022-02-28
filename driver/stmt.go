@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/proullon/ramsql/engine/log"
+	"github.com/ncrypthic/inmem/engine/log"
 )
 
 // Stmt implements the Statement interface of sql/driver

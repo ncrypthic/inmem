@@ -7,8 +7,8 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/proullon/ramsql/engine/log"
-	"github.com/proullon/ramsql/engine/protocol"
+	"github.com/ncrypthic/inmem/engine/log"
+	"github.com/ncrypthic/inmem/engine/protocol"
 )
 
 // Conn implements sql/driver Conn interface
@@ -59,12 +59,8 @@ func (c *Conn) Close() error {
 
 // Begin starts and returns a new transaction.
 func (c *Conn) Begin() (driver.Tx, error) {
-
-	tx := Tx{
-		conn: c,
-	}
-
-	return &tx, nil
+	log.Info("ramsql: %s", "begin transaction")
+	return NewTransaction(c), nil
 }
 
 // BeginTx starts and returns a new transaction.
@@ -83,7 +79,7 @@ func (c *Conn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.Tx, e
 	if sql.IsolationLevel(opts.Isolation) != sql.LevelDefault {
 		return nil, errors.New("isolation level is yet not supported")
 	}
-	return &Tx{conn: c}, nil
+	return c.Begin()
 }
 
 // PrepareContext returns a prepared statement, bound to this connection.

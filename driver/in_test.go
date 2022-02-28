@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/proullon/ramsql/engine/log"
+	"github.com/ncrypthic/inmem/engine/log"
 )
 
 func TestIn(t *testing.T) {
