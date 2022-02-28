@@ -1,12 +1,14 @@
-package driver
+package driver_test
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
 
+	"github.com/ncrypthic/inmem/driver"
 	"github.com/ncrypthic/inmem/engine/log"
 )
 
@@ -48,7 +50,6 @@ func TestInsertEmptyString(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Cannot insert empty string: %s", err)
 	}
-
 }
 
 func TestInsertTable(t *testing.T) {
@@ -1009,4 +1010,34 @@ func TestDistinct(t *testing.T) {
 		var name string
 		testDistinct(t, `SELECT DISTINCT ON (surname, age) name FROM user`, 6, &name)
 	})
+}
+
+func TestOpen(t *testing.T) {
+	db1, err := sql.Open("ramsql", "TestDb1")
+	if err != nil {
+		t.Fatalf("sql.Open : Error : %s\n", err)
+	}
+	db1.PingContext(context.TODO())
+	defer db1.Close()
+	db2, err := sql.Open("ramsql", "TestDb1")
+	if err != nil {
+		t.Fatalf("sql.Open : Error : %s\n", err)
+	}
+	defer db2.Close()
+	db2.PingContext(context.TODO())
+	connector1, err := driver.NewDriver().OpenConnector("TestDb2")
+	db3 := sql.OpenDB(connector1)
+	if err != nil {
+		t.Fatalf("sql.Open : Error : %s\n", err)
+	}
+	db3.PingContext(context.TODO())
+	defer db3.Close()
+	connector2, err := driver.NewDriver().OpenConnector("TestDb3")
+	db4 := sql.OpenDB(connector2)
+	if err != nil {
+		t.Fatalf("sql.Open : Error : %s\n", err)
+	}
+	db4.PingContext(context.TODO())
+	defer db4.Close()
+
 }

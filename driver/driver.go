@@ -129,6 +129,11 @@ func (rs *Driver) OpenConnector(dsn string) (driver.Connector, error) {
 			return nil, err
 		}
 
+		_, err = driverEndpoint.New(dsn)
+		if err != nil {
+			return nil, err
+		}
+
 		s = &Server{
 			endpoint: driverEndpoint,
 			engine:   engine,
