@@ -2,9 +2,7 @@ package driver
 
 import (
 	"context"
-	"database/sql"
 	"database/sql/driver"
-	"errors"
 	"sync"
 
 	"github.com/ncrypthic/inmem/engine/log"
@@ -76,9 +74,9 @@ func (c *Conn) Begin() (driver.Tx, error) {
 // value is true to either set the read-only transaction property if supported
 // or return an error if it is not supported.
 func (c *Conn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.Tx, error) {
-	if sql.IsolationLevel(opts.Isolation) != sql.LevelDefault {
-		return nil, errors.New("isolation level is yet not supported")
-	}
+	// if sql.IsolationLevel(opts.Isolation) != sql.LevelDefault {
+	// 	return nil, errors.New("isolation level is yet not supported")
+	// }
 	return c.Begin()
 }
 
