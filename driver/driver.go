@@ -28,7 +28,7 @@ type Server struct {
 	engine   *engine.Engine
 	driver   driver.Driver
 	dsn      string
-	conn     *Conn
+	conn     protocol.DriverConn
 
 	// Kill server on last connection closing
 	sync.Mutex
@@ -131,7 +131,7 @@ func (rs *Driver) OpenConnector(dsn string) (driver.Connector, error) {
 			return nil, err
 		}
 
-		driverConn, err = driverEndpoint.New(dsn)
+		driverConn, err := driverEndpoint.New(dsn)
 		if err != nil {
 			return nil, err
 		}
