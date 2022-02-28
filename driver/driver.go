@@ -24,11 +24,11 @@ func init() {
 // without colliding with another engine (during tests for example)
 // with the unique constraint of providing a unique DataSourceName
 type Server struct {
-	endpoint protocol.DriverEndpoint
-	engine   *engine.Engine
-	driver   driver.Driver
-	dsn      string
-	conn     protocol.DriverConn
+	endpoint     protocol.DriverEndpoint
+	engine       *engine.Engine
+	driver       driver.Driver
+	dsn          string
+	protocolConn protocol.DriverConn
 
 	// Kill server on last connection closing
 	sync.Mutex
@@ -91,11 +91,11 @@ func (rs *Driver) Open(dsn string) (conn driver.Conn, err error) {
 		}
 
 		dsnServer := &Server{
-			endpoint: driverEndpoint,
-			engine:   engine,
-			driver:   rs,
-			dsn:      dsn,
-			conn:     driverConn,
+			endpoint:     driverEndpoint,
+			engine:       engine,
+			driver:       rs,
+			dsn:          dsn,
+			protocolConn: driverConn,
 		}
 		rs.servers[dsn] = dsnServer
 
@@ -137,10 +137,10 @@ func (rs *Driver) OpenConnector(dsn string) (driver.Connector, error) {
 		}
 
 		s = &Server{
-			endpoint: driverEndpoint,
-			engine:   engine,
-			driver:   rs,
-			conn:     driverConn,
+			endpoint:     driverEndpoint,
+			engine:       engine,
+			driver:       rs,
+			protocolConn: driverConn,
 		}
 		rs.servers[dsn] = s
 	}
@@ -244,7 +244,7 @@ func parseConnectionURI(uri string) (*connConf, error) {
 // The returned connection is only used by one goroutine at a
 // time.
 func (s *Server) Connect(_ context.Context) (driver.Conn, error) {
-	return newConn(s.conn, s), nil
+	return newConn(s.protocolConn, s), nil
 }
 
 // Driver returns the underlying Driver of the Connector,
