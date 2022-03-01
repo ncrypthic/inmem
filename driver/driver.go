@@ -24,11 +24,10 @@ func init() {
 // without colliding with another engine (during tests for example)
 // with the unique constraint of providing a unique DataSourceName
 type Server struct {
-	endpoint     protocol.DriverEndpoint
-	engine       *engine.Engine
-	driver       driver.Driver
-	dsn          string
-	protocolConn protocol.DriverConn
+	endpoint protocol.DriverEndpoint
+	engine   *engine.Engine
+	driver   driver.Driver
+	dsn      string
 
 	// Kill server on last connection closing
 	sync.Mutex
@@ -91,11 +90,10 @@ func (rs *Driver) Open(dsn string) (conn driver.Conn, err error) {
 		}
 
 		dsnServer := &Server{
-			endpoint:     driverEndpoint,
-			engine:       engine,
-			driver:       rs,
-			dsn:          dsn,
-			protocolConn: driverConn,
+			endpoint: driverEndpoint,
+			engine:   engine,
+			driver:   rs,
+			dsn:      dsn,
 		}
 		rs.servers[dsn] = dsnServer
 
@@ -131,20 +129,40 @@ func (rs *Driver) OpenConnector(dsn string) (driver.Connector, error) {
 			return nil, err
 		}
 
-		driverConn, err := driverEndpoint.New(dsn)
+		_, err = driverEndpoint.New(dsn)
 		if err != nil {
 			return nil, err
 		}
 
 		s = &Server{
-			endpoint:     driverEndpoint,
-			engine:       engine,
-			driver:       rs,
-			protocolConn: driverConn,
+			endpoint: driverEndpoint,
+			engine:   engine,
+			driver:   rs,
 		}
 		rs.servers[dsn] = s
 	}
 	return s, nil
+}
+
+// Connect returns a connection to the database.
+// Connect may return a cached connection (one previously
+// closed), but doing so is unnecessary; the sql package
+// maintains a pool of idle connections for efficient re-use.
+//
+// The provided context.Context is for dialing purposes only
+// (see net.DialContext) and should not be stored or used for
+// other purposes. A default timeout should still be used
+// when dialing as a connection pool may call Connect
+// asynchronously to any query.
+//
+// The returned connection is only used by one goroutine at a
+// time.
+func (s *Server) Connect(_ context.Context) (driver.Conn, error) {
+	driverConn, err := s.endpoint.New(s.dsn)
+	if err != nil {
+		return nil, err
+	}
+	return newConn(driverConn, s), nil
 }
 
 func endpoints(conf *connConf) (protocol.DriverEndpoint, protocol.EngineEndpoint, error) {
@@ -228,23 +246,6 @@ func parseConnectionURI(uri string) (*connConf, error) {
 	c.User = dup[1]
 	c.Password = dup[2]
 	return c, nil
-}
-
-// Connect returns a connection to the database.
-// Connect may return a cached connection (one previously
-// closed), but doing so is unnecessary; the sql package
-// maintains a pool of idle connections for efficient re-use.
-//
-// The provided context.Context is for dialing purposes only
-// (see net.DialContext) and should not be stored or used for
-// other purposes. A default timeout should still be used
-// when dialing as a connection pool may call Connect
-// asynchronously to any query.
-//
-// The returned connection is only used by one goroutine at a
-// time.
-func (s *Server) Connect(_ context.Context) (driver.Conn, error) {
-	return newConn(s.protocolConn, s), nil
 }
 
 // Driver returns the underlying Driver of the Connector,
