@@ -265,8 +265,4 @@ func (s *Server) closingConn() {
 	s.Lock()
 	defer s.Unlock()
 	s.connCount--
-
-	if s.connCount == 0 {
-		s.engine.Stop()
-	}
 }
