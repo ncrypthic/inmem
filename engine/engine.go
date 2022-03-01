@@ -99,8 +99,7 @@ func (e *Engine) listen() {
 		for {
 			conn, err := e.endpoint.Accept()
 			if err != nil {
-				e.Stop()
-				return
+				continue
 			}
 
 			newConnectionChannel <- conn
