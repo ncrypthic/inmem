@@ -93,3 +93,28 @@ func createTableExecutor(e *Engine, tableDecl *parser.Decl, conn protocol.Engine
 	conn.WriteResult(0, 1)
 	return nil
 }
+
+func createDatabaseExecutor(e *Engine, databaseDecl *parser.Decl, conn protocol.EngineConn) error {
+	var i int
+
+	if len(databaseDecl.Decl) == 0 {
+		return fmt.Errorf("parsing failed, malformed query")
+	}
+
+	// Fetch constrainit (i.e: "IF EXISTS")
+	i = 0
+	for i < len(databaseDecl.Decl) {
+
+		if e.opsExecutors[databaseDecl.Decl[i].Token] != nil {
+			if err := e.opsExecutors[databaseDecl.Decl[i].Token](e, databaseDecl.Decl[i], conn); err != nil {
+				return err
+			}
+		} else {
+			break
+		}
+
+		i++
+	}
+	conn.WriteResult(0, 1)
+	return nil
+}

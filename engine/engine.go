@@ -37,6 +37,7 @@ func New(endpoint protocol.EngineEndpoint) (e *Engine, err error) {
 
 	e.opsExecutors = map[int]executor{
 		parser.CreateToken:   createExecutor,
+		parser.DatabaseToken: createDatabaseExecutor,
 		parser.TableToken:    createTableExecutor,
 		parser.SelectToken:   selectExecutor,
 		parser.InsertToken:   insertIntoTableExecutor,

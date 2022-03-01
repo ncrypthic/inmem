@@ -3,6 +3,8 @@ package engine
 import (
 	"testing"
 
+	"github.com/ncrypthic/inmem/engine/log"
+	"github.com/ncrypthic/inmem/engine/parser"
 	"github.com/ncrypthic/inmem/engine/protocol"
 )
 
@@ -46,4 +48,33 @@ func testEngine(t *testing.T) *Engine {
 func TestNewEngine(t *testing.T) {
 	e := testEngine(t)
 	e.Stop()
+}
+
+func TestCreateDatabase(t *testing.T) {
+	log.UseTestLogger(t)
+	query := `CREATE DATABASE sample`
+
+	e := testEngine(t)
+	defer e.Stop()
+
+	i, err := parser.ParseInstruction(query)
+	if err != nil {
+		t.Fatalf("Cannot parse query %s : %s", query, err)
+	}
+
+	err = e.executeQuery(i[0], &TestEngineConn{})
+	if err != nil {
+		t.Fatalf("Cannot execute query: %s", err)
+	}
+	query2 := `CREATE DATABASE sample IF NOT EXISTS`
+
+	i, err = parser.ParseInstruction(query2)
+	if err != nil {
+		t.Fatalf("Cannot parse query %s : %s", query2, err)
+	}
+
+	err = e.executeQuery(i[0], &TestEngineConn{})
+	if err != nil {
+		t.Fatalf("Cannot execute query: %s", err)
+	}
 }

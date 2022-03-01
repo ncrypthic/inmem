@@ -22,6 +22,13 @@ func (p *parser) parseCreate(tokens []Token) (*Instruction, error) {
 	p.index++
 
 	switch tokens[p.index].Token {
+	case DatabaseToken:
+		vDecl, err := p.parseDatabase(tokens)
+		if err != nil {
+			return nil, err
+		}
+		createDecl.Add(vDecl)
+		break
 	case TableToken:
 		d, err := p.parseTable(tokens)
 		if err != nil {
@@ -34,6 +41,46 @@ func (p *parser) parseCreate(tokens []Token) (*Instruction, error) {
 	}
 
 	return i, nil
+}
+
+func (p *parser) parseDatabase(tokens []Token) (*Decl, error) {
+	var err error
+	databaseDecl := NewDecl(tokens[p.index])
+	p.index++
+
+	// Now we should found table name
+	nameDatabase, err := p.parseAttribute()
+	if err != nil {
+		return nil, p.syntaxError()
+	}
+	databaseDecl.Add(nameDatabase)
+
+	// Maybe have "IF NOT EXISTS" here
+	if p.is(IfToken) {
+		ifDecl, err := p.consumeToken(IfToken)
+		if err != nil {
+			return nil, err
+		}
+		databaseDecl.Add(ifDecl)
+
+		if p.is(NotToken) {
+			notDecl, err := p.consumeToken(NotToken)
+			if err != nil {
+				return nil, err
+			}
+			ifDecl.Add(notDecl)
+			if !p.is(ExistsToken) {
+				return nil, p.syntaxError()
+			}
+			existsDecl, err := p.consumeToken(ExistsToken)
+			if err != nil {
+				return nil, err
+			}
+			notDecl.Add(existsDecl)
+		}
+	}
+
+	return databaseDecl, nil
 }
 
 func (p *parser) parseTable(tokens []Token) (*Decl, error) {
@@ -103,7 +150,6 @@ func (p *parser) parseTable(tokens []Token) (*Decl, error) {
 			return nil, err
 		}
 		tableDecl.Add(newAttribute)
-
 
 		newAttributeType, err := p.parseType()
 		if err != nil {
