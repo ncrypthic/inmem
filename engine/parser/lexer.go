@@ -80,6 +80,7 @@ const (
 	UniqueToken
 	NowToken
 	OffsetToken
+	DatabaseToken
 
 	// Type Token
 
@@ -178,6 +179,7 @@ func (l *lexer) lex(instruction []byte) ([]Token, error) {
 	matchers = append(matchers, l.MatchUniqueToken)
 	matchers = append(matchers, l.MatchNowToken)
 	matchers = append(matchers, l.MatchOffsetToken)
+	matchers = append(matchers, l.MatchDatabaseToken)
 	// Type Matcher
 	matchers = append(matchers, l.MatchPrimaryToken)
 	matchers = append(matchers, l.MatchKeyToken)
@@ -407,6 +409,10 @@ func (l *lexer) MatchOnToken() bool {
 
 func (l *lexer) MatchOffsetToken() bool {
 	return l.Match([]byte("offset"), OffsetToken)
+}
+
+func (l *lexer) MatchDatabaseToken() bool {
+	return l.Match([]byte("database"), DatabaseToken)
 }
 
 func (l *lexer) MatchStringToken() bool {

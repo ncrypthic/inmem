@@ -26,4 +26,9 @@ func TestDrop(t *testing.T) {
 	if err != nil {
 		t.Fatalf("cannot drop table: %s", err)
 	}
+
+	_, err = db.Exec("DROP DATABASE TestDrop")
+	if err != nil {
+		t.Fatalf("cannot drop database: %s", err)
+	}
 }

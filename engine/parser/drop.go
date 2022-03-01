@@ -14,7 +14,7 @@ func (p *parser) parseDrop() (*Instruction, error) {
 	}
 	i.Decls = append(i.Decls, trDecl)
 
-	tableDecl, err := p.consumeToken(TableToken)
+	tableDecl, err := p.consumeToken(TableToken, DatabaseToken)
 	if err != nil {
 		log.Debug("Consume table !\n")
 		return nil, err
